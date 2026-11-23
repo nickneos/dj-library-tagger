@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# VS Code
+.vscode/
+
+# Audio & Artwork (in case scripts are tested inside the repo folder)
+*.mp3
+*.m4a
+*.jpg
+*.jpeg
+*.png
