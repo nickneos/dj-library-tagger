@@ -4,7 +4,9 @@ from pathlib import Path
 from mutagen.id3 import ID3, ID3NoHeaderError, TPE2, TCMP, TXXX
 from mutagen.mp4 import MP4, MP4FreeForm
 
+
 SUPPORTED_EXTS = {".mp3", ".m4a"}
+
 
 def update_compilations(root: Path, album_artist: str, release_type: str, dry_run: bool = True):
     files = sorted(
@@ -55,6 +57,7 @@ def update_compilations(root: Path, album_artist: str, release_type: str, dry_ru
             f"[UPDATED] {rel_path} -> Album Artist={album_artist!r}, "
             f"RELEASETYPE={release_type!r}, Compilation=True"
         )
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(

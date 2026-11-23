@@ -6,6 +6,7 @@ from pathlib import Path
 from mutagen.id3 import ID3, ID3NoHeaderError, TIT2, TPE1, TPE2, TALB, TDRC, TRCK, APIC
 from mutagen.mp4 import MP4, MP4Cover
 
+
 # Matches: "[Artist/]Album/RawTitle"
 PATH_PATTERN = re.compile(r"^(?:(?P<artist>[^/]+)/)?(?P<album>[^/]+)/(?P<raw_title>[^/]+)$")
 
@@ -23,6 +24,7 @@ TRAILING_DATE = re.compile(
 
 SUPPORTED_EXTS = {".mp3", ".m4a"}
 
+
 def parse_title_and_date(raw_title: str) -> tuple[str, str | None]:
     raw_date = None
     title = raw_title
@@ -37,6 +39,7 @@ def parse_title_and_date(raw_title: str) -> tuple[str, str | None]:
         raw_date = f"{raw_date[:4]}-{raw_date[4:6]}-{raw_date[6:8]}"
 
     return title.strip(), raw_date
+
 
 def find_cover(audio_path: Path) -> Path | None:
     stem_lower = audio_path.stem.lower()
@@ -54,6 +57,7 @@ def find_cover(audio_path: Path) -> Path | None:
             if f.is_file() and f.name.lower() in folder_names:
                 return f
     return None
+
 
 def tag_mp3(path: Path, artist: str, album: str, title: str, date: str | None, track_num: int | None, cover: Path | None):
     try:
@@ -86,6 +90,7 @@ def tag_mp3(path: Path, artist: str, album: str, title: str, date: str | None, t
     tags.update_to_v23()
     tags.save(path, v2_version=3)
 
+
 def tag_m4a(path: Path, artist: str, album: str, title: str, date: str | None, track_num: int | None, cover: Path | None):
     audio = MP4(path)
     if audio.tags is None:
@@ -107,6 +112,7 @@ def tag_m4a(path: Path, artist: str, album: str, title: str, date: str | None, t
         audio.tags["covr"] = [MP4Cover(cover.read_bytes(), imageformat=img_fmt)]
 
     audio.save()
+
 
 def process_library(root: Path, dry_run: bool = True, set_track_numbers: bool = False):
     folders: dict[Path, list[Path]] = defaultdict(list)
@@ -145,6 +151,7 @@ def process_library(root: Path, dry_run: bool = True, set_track_numbers: bool = 
                 tag_mp3(audio_file, artist, album, title, date, track_num, cover)
             elif audio_file.suffix.lower() == ".m4a":
                 tag_m4a(audio_file, artist, album, title, date, track_num, cover)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Tag DJ mixes (.mp3/.m4a) from path and embed cover art.")
