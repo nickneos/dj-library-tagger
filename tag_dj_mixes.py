@@ -114,9 +114,14 @@ def tag_m4a(path: Path, artist: str, album: str, title: str, date: str | None, t
     audio.save()
 
 
-def process_library(root: Path, dry_run: bool = True, set_track_numbers: bool = False):
+def process_library(root: Path, dry_run: bool = True, set_track_numbers: bool = False, exclude_va: bool = True):
     folders: dict[Path, list[Path]] = defaultdict(list)
     for f in root.rglob("*"):
+        if exclude_va:
+            if (f.parent.name.strip().lower() == "various artists"
+                or f.parent.parent.name.strip().lower() == "various artists"
+            ):
+                continue
         if f.is_file() and f.suffix.lower() in SUPPORTED_EXTS:
             folders[f.parent].append(f)
 
@@ -135,13 +140,19 @@ def process_library(root: Path, dry_run: bool = True, set_track_numbers: bool = 
             artist = data["artist"] or root.name
             album = data["album"]
             title, date = parse_title_and_date(data["raw_title"])
+
+            # Fallback: extract date from album folder name if not found in track title
+            if not date:
+                _, date = parse_title_and_date(album)
+
             cover = find_cover(audio_file)
             track_num = track_idx if set_track_numbers else None
 
             track_info = f", Track='{track_num}'" if track_num is not None else ""
+            run_type = "DRY-RUN" if dry_run else "UPDATE"
             print(
-                f"[MATCH] {rel_no_ext}{audio_file.suffix} -> Artist={artist!r}, Album={album!r}, "
-                f"Date={date!r}, Title={title!r}{track_info} | Cover={cover.name if cover else 'None'}"
+                f"[{run_type}] {rel_no_ext}{audio_file.suffix} ->\n\tArtist={artist!r}\n\tAlbum={album!r}\n\t"
+                f"Date={date!r}\n\tTitle={title!r}{track_info}\n\tCover={cover.name if cover else 'None'}\n"
             )
 
             if dry_run:
@@ -158,10 +169,12 @@ if __name__ == "__main__":
     parser.add_argument("directory", type=Path, help="Path to 'DJ Sets' or an Artist folder")
     parser.add_argument("-t", "--track-numbers", action="store_true", help="Assign sequential track numbers per folder")
     parser.add_argument("--apply", action="store_true", help="Write tags (default is dry-run)")
+    parser.add_argument("--include-va", action="store_true", help="Include folder Various Artists")
     args = parser.parse_args()
 
     process_library(
         args.directory.resolve(),
         dry_run=not args.apply,
         set_track_numbers=args.track_numbers,
+        exclude_va=not args.include_va
     )

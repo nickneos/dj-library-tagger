@@ -98,6 +98,7 @@ DJ Sets/
 | `directory` | Path to the root `DJ Sets` directory or an individual `Artist` folder. |
 | `-t`, `--track-numbers` | Assign sequential track numbers (`1`, `2`, `3`...) per folder alphanumerically. |
 | `--apply` | Write tags and artwork to files (omitting this runs a safe dry-run). |
+| `--include-va` | Include **various artists** folder during scan. By default, ommiting this excludes audio in a **various artists** folder.  |
 | `-h`, `--help` | Show help message and exit. |
 
 ---
